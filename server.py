@@ -64,7 +64,7 @@ def create_app(config=None, adapter=None, db_path=None):
     app.config['MAX_CONTENT_LENGTH'] = 8192
     config = config if config is not None else {**dotenv_values(ROOT / '.env'), **os.environ}
     adapter = adapter or ReMarked(config)
-    private = ROOT / '.private'
+    private = Path(config.get('DATA_DIR') or ROOT / '.private')
     private.mkdir(mode=0o700, exist_ok=True)
     db_path = db_path or private / 'bookings.sqlite3'
     with closing(sqlite3.connect(db_path)) as db, db:
@@ -72,6 +72,10 @@ def create_app(config=None, adapter=None, db_path=None):
     os.chmod(db_path, 0o600)
     lock = threading.Lock()
     rate = {}
+
+    @app.get('/healthz')
+    def health():
+        return jsonify(ok=True)
 
     @app.after_request
     def cors(response):
@@ -98,8 +102,8 @@ def create_app(config=None, adapter=None, db_path=None):
     @app.post('/api/bookings')
     def book():
         origin = request.headers.get('Origin')
-        allowed = config.get('PUBLIC_ORIGIN') or request.host_url.rstrip('/')
-        if origin and origin != allowed:
+        allowed = {request.host_url.rstrip('/'), config.get('PUBLIC_ORIGIN')}
+        if origin and origin not in allowed:
             return jsonify(ok=False, message='Недопустимый источник запроса.'), 403
         if not request.is_json:
             return jsonify(ok=False, message='Ожидается JSON.'), 415
