@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#8e2f34">
+<meta name="robots" content="noindex, nofollow">
+<title>Мануфактура</title>
+<script src="https://telegram.org/js/telegram-web-app.js?57"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="fonts/oldstandard.css">
+<style>
+:root{
+  --bord:#8e2f34;        /* бордо обложки меню */
+  --bord-2:#73252a;
+  --bord-ink:#7a262c;    /* бордовый текст на креме */
+  --cream:#f5efe6;       /* крем страниц меню */
+  --paper:#fbf8f3;
+  --line:#e5dccf;
+  --line-2:#d9cbb8;
+  --ink:#2b2420;
+  --ink-2:#6a5f55;
+  --on-bord:#f6eee4;
+  --on-bord-2:#e3cfc6;
+  --cond:'Roboto Condensed','Arial Narrow',sans-serif;
+  --text:'Golos Text',-apple-system,'Segoe UI',sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --tabbar:64px;
+  --safe-b:env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--cream);color:var(--ink);font:16px/1.45 var(--text);-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+::selection{background:var(--bord);color:var(--on-bord)}
+img{display:block;max-width:100%}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--bord);outline-offset:2px;border-radius:6px}
+.app{max-width:560px;margin:0 auto;min-height:100%;padding-bottom:calc(var(--tabbar) + var(--safe-b) + 16px)}
+
+/* ---------- Шапка ---------- */
+.cap{background:var(--bord);color:var(--on-bord);padding:18px 18px 16px;display:flex;align-items:center;gap:14px}
+.cap img{width:52px;height:62px;object-fit:contain;flex:none}
+.cap h1{font:800 22px/1 var(--cond);letter-spacing:.06em;text-transform:uppercase}
+.cap p{font-size:13.5px;color:var(--on-bord-2);margin-top:5px}
+.cap .open{margin-left:auto;text-align:right;font:700 12.5px/1.25 var(--cond);letter-spacing:.08em;text-transform:uppercase;color:var(--on-bord)}
+.cap .open span{display:block;font:400 12.5px var(--text);letter-spacing:0;text-transform:none;color:var(--on-bord-2)}
+
+/* ---------- Нижняя панель ---------- */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--paper);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
+.tabbar .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);height:var(--tabbar)}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:none;border:0;cursor:pointer;color:var(--ink-2);font:700 11.5px/1 var(--cond);letter-spacing:.08em;text-transform:uppercase}
+.tab svg{width:24px;height:24px}
+.tab[aria-selected="true"]{color:var(--bord)}
+
+/* ---------- Экраны ---------- */
+.screen{display:none;animation:in .35s var(--ease)}
+.screen.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.pad{padding:0 18px}
+.h2{font:800 30px/1 var(--cond);letter-spacing:.02em;text-transform:uppercase;color:var(--bord-ink);margin:24px 0 6px}
+.sub{color:var(--ink-2);font-size:14.5px}
+
+/* сегменты и чипы */
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:18px 18px 0;padding:4px;border-radius:12px;background:#ece3d6}
+.seg button{min-height:38px;border:0;border-radius:9px;background:none;cursor:pointer;font:700 13px/1 var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.seg button[aria-selected="true"]{background:var(--paper);color:var(--bord-ink);box-shadow:0 1px 3px rgba(60,30,20,.12)}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:14px 18px 2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:36px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line-2);background:transparent;font:600 14px/1 var(--text);color:var(--ink-2);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--bord);border-color:var(--bord);color:var(--on-bord)}
+
+/* позиции меню — как в их бумажном меню */
+.group{font:800 17px/1 var(--cond);letter-spacing:.08em;text-transform:uppercase;color:var(--bord-ink);padding:22px 0 10px;border-bottom:1.5px solid var(--bord)}
+.list{list-style:none}
+.it{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;cursor:default}
+button.it{cursor:pointer}
+.it .ph{width:56px;height:56px;border-radius:10px;object-fit:cover;background:#e9dfd1}
+.it .ph.none{width:0;margin-right:-12px}
+.it .nm{display:block;font:700 15.5px/1.2 var(--cond);letter-spacing:.03em;text-transform:uppercase;color:var(--bord-ink)}
+.it .ds{display:block;font-size:13px;line-height:1.35;color:var(--ink-2);margin-top:3px}
+.it .rt{display:flex;align-items:center;gap:8px}
+.it .w{font-size:12px;color:var(--ink-2);white-space:nowrap}
+.pr{display:grid;place-items:center;width:46px;height:46px;border:1.5px solid var(--bord);border-radius:50%;font:700 15px/1 var(--cond);color:var(--bord-ink);flex:none}
+.note{margin:18px 0 0;padding:12px 14px;border:1.5px solid var(--bord);border-radius:999px;text-align:center;font:700 12.5px/1.3 var(--cond);letter-spacing:.05em;text-transform:uppercase;color:var(--bord-ink)}
+.sigbox{border:1.5px solid var(--bord);border-radius:14px;padding:0 14px;margin-top:12px}
+.sigbox .it:last-child{border-bottom:0}
+.t-price{display:flex;align-items:center;gap:12px;margin-top:14px;color:var(--ink-2);font-size:14px}
+.t-price .pr{width:58px;height:58px;font-size:20px}
+.bar2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.plain{list-style:none}
+.plain li{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font:600 13.5px/1.25 var(--cond);letter-spacing:.02em;text-transform:uppercase;color:var(--ink)}
+.plain li b{font-weight:700;color:var(--bord-ink)}
+
+/* ---------- Книга образцов ---------- */
+.book-head{background:var(--bord);color:var(--on-bord);padding:2px 18px 20px}
+.book-head .kick{font-size:14px;color:var(--on-bord-2);margin-top:6px}
+.book-head h2{font:800 34px/1 var(--cond);letter-spacing:.02em;text-transform:uppercase}
+.rank{margin-top:16px;padding:14px 16px;border-radius:14px;background:rgba(246,238,228,.1);border:1.5px solid rgba(246,238,228,.28)}
+.rank .lbl{font:700 12px/1 var(--cond);letter-spacing:.12em;text-transform:uppercase;color:var(--on-bord-2)}
+.rank .title{font:800 26px/1.05 var(--cond);letter-spacing:.02em;text-transform:uppercase;margin-top:6px}
+.rank .next{font-size:13.5px;color:var(--on-bord-2);margin-top:4px}
+.ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:12px}
+.ladder i{height:6px;border-radius:99px;background:rgba(246,238,228,.22)}
+.ladder i.on{background:var(--on-bord)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stats div{text-align:left}
+.stats b{display:block;font:800 24px/1 var(--cond)}
+.stats span{font-size:12px;color:var(--on-bord-2)}
+.share{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:46px;margin-top:14px;border-radius:12px;border:1.5px solid rgba(246,238,228,.55);background:transparent;color:var(--on-bord);font:700 14px/1 var(--cond);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.share svg{width:18px;height:18px}
+.pages{padding:6px 18px 0}
+.page{padding:20px 0 6px;border-bottom:1px dashed var(--line-2)}
+.page-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.page-h b{font:800 18px/1 var(--cond);letter-spacing:.08em;text-transform:uppercase;color:var(--bord-ink)}
+.page-h span{font:700 13px/1 var(--cond);letter-spacing:.06em;color:var(--ink-2)}
+.page.full .page-h span{color:var(--bord-ink)}
+.sw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 10px}
+.sw{display:flex;flex-direction:column;gap:6px;padding:0;border:0;background:none;text-align:left;cursor:pointer;color:inherit}
+.sw .slot{position:relative;aspect-ratio:4/3;border-radius:6px;border:1.5px dashed var(--line-2);background:var(--paper);display:grid;place-items:center}
+.sw .slot em{font:700 13px/1 var(--cond);letter-spacing:.08em;color:#b9a994;font-style:normal}
+.sw.has .slot{border:0;background:none;filter:drop-shadow(0 2px 3px rgba(60,30,20,.18))}
+.sw .slot svg{position:absolute;inset:0;width:100%;height:100%}
+.sw .n{font:700 13px/1.15 var(--cond);letter-spacing:.02em;text-transform:uppercase;color:var(--bord-ink);overflow-wrap:anywhere}
+.sw .cnt{font-size:12px;color:var(--ink-2)}
+.sw.new .slot{animation:sewn .7s var(--ease)}
+@keyframes sewn{from{transform:scale(.6) rotate(-8deg);opacity:0}}
+.rules{padding:20px 18px 0}
+.rules h3{font:800 17px/1 var(--cond);letter-spacing:.08em;text-transform:uppercase;color:var(--bord-ink);margin-bottom:10px}
+.rules li{list-style:none;display:grid;grid-template-columns:28px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.rules li b{font:800 18px/1.2 var(--cond);color:var(--bord-ink)}
+.rules .demo{margin-top:12px;font-size:13px;color:var(--ink-2)}
+.sheet .sw-big{width:100%;aspect-ratio:16/9;margin-bottom:14px;filter:drop-shadow(0 3px 5px rgba(60,30,20,.2))}
+.sheet .sw-big svg{width:100%;height:100%}
+.history{margin:18px 18px 0;padding:16px;border-radius:14px;background:var(--paper);border:1.5px solid var(--line-2)}
+.history h3{font:800 17px/1.1 var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--bord-ink)}
+.history p{font-size:14.5px;margin-top:8px}
+.credit{margin:28px 18px 8px;text-align:center;font-size:12.5px;color:var(--ink-2)}
+.credit a{color:var(--ink-2);text-underline-offset:3px}
+.st-btn{display:block;text-align:left;background:none;border:0;padding:0;color:inherit;cursor:pointer}
+.st-btn b{display:block;font:800 24px/1 var(--cond)}
+.st-btn span{font-size:12px;color:var(--on-bord-2);text-decoration:underline;text-underline-offset:3px}
+.hist{list-style:none;margin-top:14px}
+.hist li{display:grid;grid-template-columns:92px 1fr 40px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.hist li span{font:700 15px/1 var(--cond);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.hist li i{display:block;height:12px;border-radius:99px;background:linear-gradient(var(--bord),var(--bord)) left/var(--w) 100% no-repeat,#ece3d6}
+.hist li b{font:800 20px/1 var(--cond);color:var(--bord-ink);text-align:right}
+.story{display:grid;grid-template-columns:44% 1fr;gap:14px;align-items:start;margin-top:12px}
+.story canvas{width:100%;height:auto;border-radius:10px;box-shadow:0 4px 12px rgba(60,30,20,.25)}
+.photo-btn{margin-top:0;min-height:46px;font-size:13px;text-align:center;padding:0 8px;line-height:1.15}
+.story-side .link{margin-top:8px;font-size:14px}
+.tgls{display:grid;gap:4px;margin-top:12px}
+.tgl{display:flex;align-items:center;gap:10px;min-height:40px;font-size:15px;cursor:pointer}
+.tgl input{width:22px;height:22px;accent-color:var(--bord);flex:none}
+.viewer{position:fixed;inset:0;z-index:70;background:rgba(20,10,10,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px}
+.viewer[hidden]{display:none}
+.viewer img{max-height:78vh;max-width:100%;border-radius:12px}
+.viewer p{color:#f6eee4;font-size:14.5px;text-align:center}
+.viewer a{color:#f6eee4;font-size:14px}
+/* ---------- Нижний лист ---------- */
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(43,36,32,.45);opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;max-width:560px;margin:0 auto;background:var(--paper);border-radius:20px 20px 0 0;padding:10px 18px calc(20px + var(--safe-b));transform:translateY(105%);transition:transform .4s var(--ease);max-height:88vh;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
+.sheet.on{transform:none}
+.grab{width:40px;height:5px;border-radius:99px;background:var(--line-2);margin:0 auto 14px}
+.sheet .big{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;margin-bottom:14px}
+.sheet h3{font:800 24px/1.1 var(--cond);letter-spacing:.02em;text-transform:uppercase;color:var(--bord-ink)}
+.sheet .ds{color:var(--ink-2);margin-top:6px}
+.sheet .row{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.code{display:flex;gap:8px;margin:16px 0 6px}
+.code input{width:100%;min-height:54px;border:1.5px solid var(--line-2);border-radius:12px;background:#fff;text-align:center;font:800 26px/1 var(--cond);letter-spacing:.4em;padding-left:.4em}
+.code input:focus{outline:none;border-color:var(--bord)}
+.code input[aria-invalid="true"]{border-color:#b3261e}
+.err{display:none;color:#b3261e;font-size:13.5px;margin-top:4px}
+.err.on{display:block}
+.hint{font-size:13px;color:var(--ink-2);margin-top:8px}
+
+/* ---------- Кнопки, формы ---------- */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;border:0;border-radius:12px;background:var(--bord);color:var(--on-bord);font:700 16px/1 var(--cond);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;margin-top:14px;text-decoration:none}
+.btn:active{background:var(--bord-2)}
+.btn.ghost{background:transparent;color:var(--bord-ink);border:1.5px solid var(--bord)}
+.btn[disabled]{opacity:.55}
+.f{margin-top:16px;border:0;min-width:0}
+.f > label,.f > legend{display:block;font:700 12.5px/1 var(--cond);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-bottom:8px}
+.inp{width:100%;min-height:50px;padding:12px 14px;border:1.5px solid var(--line-2);border-radius:12px;background:#fff;font-size:16px}
+.inp:focus{outline:none;border-color:var(--bord)}
+.inp[aria-invalid="true"]{border-color:#b3261e}
+.inp::placeholder{color:#766b60}
+select.inp{appearance:none}
+textarea.inp{min-height:76px;resize:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.days{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.stepper{display:flex;align-items:center;justify-content:space-between;min-height:50px;border:1.5px solid var(--line-2);border-radius:12px;background:#fff}
+.stepper button{width:48px;height:46px;border:0;background:none;font-size:22px;cursor:pointer;color:var(--bord-ink)}
+.stepper button:disabled{color:var(--line-2)}
+.stepper output{font:800 19px var(--cond)}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-h b{font:800 20px/1 var(--cond);letter-spacing:.04em;text-transform:uppercase;color:var(--bord-ink)}
+.cal-nav{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line-2);background:var(--cream);color:var(--bord-ink);cursor:pointer;display:grid;place-items:center}
+.cal-nav:disabled{opacity:.35;cursor:default}
+.cal-nav svg{width:18px;height:18px}
+.cal-w,.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal-w span{font:700 12px/1 var(--cond);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);padding:6px 0}
+.cal-w span:nth-child(n+6){color:var(--bord-ink)}
+.cal-g button{aspect-ratio:1;border:0;border-radius:12px;background:none;font:700 16px/1 var(--cond);color:var(--ink);cursor:pointer}
+.cal-g button:disabled{color:#c9bcab;cursor:default}
+.cal-g button.today{box-shadow:inset 0 0 0 1.5px var(--line-2)}
+.cal-g button.wknd{color:var(--bord-ink)}
+.cal-g button[aria-pressed="true"]{background:var(--bord);color:var(--on-bord)}
+.cal-g button:disabled.wknd{color:#c9bcab}
+/* гость за столом */
+.guest{margin:16px 18px 0;padding:16px;border-radius:14px;background:var(--paper);border:1.5px solid var(--bord)}
+.guest h3{font:800 18px/1.1 var(--cond);letter-spacing:.04em;text-transform:uppercase;color:var(--bord-ink)}
+.guest p{font-size:14px;color:var(--ink-2);margin-top:4px}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.act{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:12px;border:1.5px solid var(--line-2);background:var(--cream);font:700 12.5px/1.1 var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--bord-ink);text-decoration:none;cursor:pointer;text-align:center}
+.act svg{width:24px;height:24px}
+.toast{position:fixed;left:50%;bottom:calc(var(--tabbar) + var(--safe-b) + 14px);z-index:60;transform:translate(-50%,20px);opacity:0;max-width:calc(100% - 36px);padding:12px 16px;border-radius:12px;background:var(--ink);color:var(--cream);font-size:14px;transition:opacity .25s,transform .3s var(--ease);pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.link{background:none;border:0;padding:0;color:var(--bord-ink);font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.ok{padding-top:8px}
+.ok h3{font:800 30px/1 var(--cond);text-transform:uppercase;color:var(--bord-ink);margin-top:22px}
+.ok p{margin-top:10px}
+.ok .demo{font-size:13px;color:var(--ink-2);margin-top:12px}
+.ok-card{margin-top:14px;padding:4px 16px;border-radius:14px;background:var(--paper);border:1.5px solid var(--line-2)}
+.ok-card div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.ok-card div:last-child{border-bottom:0}
+.ok-card dt{font:700 12.5px/1.3 var(--cond);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.ok-card dd{font-weight:600;text-align:right}
+.big-num{font:800 34px/1 var(--cond);letter-spacing:.02em;color:var(--bord-ink);margin:12px 0 4px;user-select:all;-webkit-user-select:all}
+.info button{all:unset;box-sizing:border-box;display:flex;justify-content:space-between;align-items:baseline;gap:16px;width:100%;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer;color:var(--ink)}
+.info button:focus-visible{outline:2px solid var(--bord);outline-offset:2px}
+.info button .k{font:700 12.5px/1 var(--cond);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.info button .v{text-align:right;font-weight:500;color:var(--bord-ink);text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:4px}
+.info button .v small{display:block;font-weight:400;font-size:14px;color:var(--ink-2);text-decoration:none}
+
+/* ---------- О баре ---------- */
+.about-top{background:var(--bord);color:var(--on-bord);padding:6px 18px 24px;text-align:center}
+.about-top img{width:100%;max-width:380px;margin:0 auto}
+.about-top p{margin-top:12px;color:var(--on-bord-2);font-size:14.5px}
+.info{margin:8px 18px 0}
+.info a,.info div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.info dt,.info .k{font:700 12.5px/1 var(--cond);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.info .v2{text-align:right;font-weight:500}
+.info dd{text-align:right;font-weight:500}
+.info dd span{display:block;font-weight:400;color:var(--ink-2);font-size:14px}
+.info a dd{color:var(--bord-ink)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="cap">
+    <img src="img/logo-round.png" alt="Мануфактура, бар-кухня">
+    <div><h1>Мануфактура</h1><p>Бар-кухня в старом доме</p></div>
+    <p class="open" id="open"></p>
+  </header>
+
+  <!-- Меню -->
+  <section class="screen on" id="s-menu" aria-label="Меню">
+    <div class="seg" role="tablist" id="menuSeg">
+      <button role="tab" aria-selected="true" data-m="kitchen">Кухня</button>
+      <button role="tab" aria-selected="false" data-m="cocktails">Коктейли</button>
+      <button role="tab" aria-selected="false" data-m="tinct">Настойки</button>
+      <button role="tab" aria-selected="false" data-m="bar">Бар</button>
+    </div>
+    <div id="menuBody"></div>
+  </section>
+
+  <!-- Книга образцов -->
+  <section class="screen" id="s-bingo" aria-label="Книга образцов">
+    <div class="book-head">
+      <h2>Книга образцов</h2>
+      <p class="kick">Лавка «Мануфактурные товары», 1873</p>
+      <div class="rank" id="rank"></div>
+    </div>
+    <div class="pages" id="pages"></div>
+    <div class="rules">
+      <h3>Как это работает</h3>
+      <ul>
+        <li><b>1</b><span>Здесь, в доме купца А. Г. Морозова, когда-то продавали мануфактуру — ткани. Теперь у каждой нашей настойки свой образец.</span></li>
+        <li><b>2</b><span>Заказали настойку — бармен вводит код дня, и образец вшивается в вашу книгу. Повторная рюмка тоже считается.</span></li>
+        <li><b>3</b><span>Звание растёт с числом разных образцов: 5 — купец 3-й гильдии, 12 — 2-й, все 19 — 1-й гильдии, как сам Морозов.</span></li>
+        <li><b>₽</b><span id="wedRule"></span></li>
+      </ul>
+      <p class="demo" id="demoCode"></p>
+    </div>
+  </section>
+
+  <!-- Бронь -->
+  <section class="screen pad" id="s-book" aria-label="Бронь стола">
+    <h2 class="h2">Бронь стола</h2>
+    <p class="sub">Администратор перезвонит и подтвердит.</p>
+    <form id="form" novalidate>
+      <div class="f"><label for="fName">Имя</label><input class="inp" id="fName" autocomplete="given-name" placeholder="Как к вам обращаться"><p class="err" id="eName">Напишите, как вас зовут.</p></div>
+      <div class="f"><label for="fPhone">Телефон</label><input class="inp" id="fPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 900 000-00-00"><p class="err" id="ePhone">Нужен номер из 11 цифр.</p></div>
+      <fieldset class="f"><legend>День</legend><div class="days" id="days"></div></fieldset>
+      <div class="two">
+        <div class="f"><label for="fTime">Время</label><select class="inp" id="fTime"></select></div>
+        <div class="f"><label id="gL">Гостей</label><div class="stepper" role="group" aria-labelledby="gL"><button type="button" id="gM" aria-label="Меньше гостей">−</button><output id="gO">2</output><button type="button" id="gP" aria-label="Больше гостей">+</button></div></div>
+      </div>
+      <div class="f"><label for="fNote">Пожелания</label><textarea class="inp" id="fNote" placeholder="У окна, день рождения, аллергия"></textarea></div>
+      <button class="btn" type="submit" id="send">Отправить заявку</button>
+    </form>
+    <div class="ok" id="ok" hidden>
+      <h3>Заявка у нас</h3>
+      <dl class="ok-card" id="okCard"></dl>
+      <p>Администратор перезвонит, чтобы подтвердить. Если планы поменяются — <button class="link" type="button" id="okCall">позвоните в бар</button>.</p>
+      <button class="btn ghost" type="button" id="again">Новая бронь</button>
+      <p class="demo" id="demoNote">Демо: заявка никуда не отправлена.</p>
+    </div>
+  </section>
+
+  <!-- О баре -->
+  <section class="screen" id="s-about" aria-label="О баре">
+    <div class="about-top"><img src="img/facade.png" alt="Рисунок фасада: дом купца Морозова"><p id="motto"></p></div>
+    <div class="history" id="history"></div>
+    <div id="aboutActs"></div>
+    <div class="info" id="info"></div>
+    <div class="pad"><a class="btn ghost" id="tgLink" target="_blank" rel="noopener">Канал в Telegram</a></div>
+    <p class="credit" id="credit"></p>
+  </section>
+</div>
+
+<nav class="tabbar" aria-label="Разделы"><div class="in" role="tablist">
+  <button class="tab" role="tab" aria-selected="true" data-s="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>Меню</button>
+  <button class="tab" role="tab" aria-selected="false" data-s="bingo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M5 4.5h11.5A2.5 2.5 0 0 1 19 7v12.5H7.5A2.5 2.5 0 0 1 5 17V4.5Z"/><path d="M5 17a2.5 2.5 0 0 1 2.5-2.5H19"/><path d="M9 8h6M9 11h4" stroke-dasharray="2 1.6"/></svg>Книга</button>
+  <button class="tab" role="tab" aria-selected="false" data-s="book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M8 3.5v4M16 3.5v4M4 10.5h16M9 15l2 2 4-4"/></svg>Бронь</button>
+  <button class="tab" role="tab" aria-selected="false" data-s="about"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>О баре</button>
+</div></nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="viewer" id="viewer" hidden><img alt="Сторис" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="><p>Нажмите и удерживайте картинку, чтобы сохранить. Нажмите вне картинки, чтобы закрыть.</p><a download="manufaktura-story.png">Скачать файл</a></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle"><div class="grab"></div><div id="sheetBody"></div></div>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="booking-api.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
