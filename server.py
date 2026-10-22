@@ -102,7 +102,7 @@ def create_app(config=None, adapter=None, db_path=None):
     @app.post('/api/bookings')
     def book():
         origin = request.headers.get('Origin')
-        allowed = {request.host_url.rstrip('/'), config.get('PUBLIC_ORIGIN')}
+        allowed = {request.host_url.rstrip('/'), config.get('PUBLIC_ORIGIN'), config.get('APP_ORIGIN')}
         if origin and origin not in allowed:
             return jsonify(ok=False, message='Недопустимый источник запроса.'), 403
         if not request.is_json:
