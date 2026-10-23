@@ -15,12 +15,7 @@
   }
 
   /* ---------- Время ---------- */
-  const clockParts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Barnaul', year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
-  }).formatToParts(new Date()).map(p => [p.type, p.value]));
-  const now = new Date(+clockParts.year, +clockParts.month - 1, +clockParts.day,
-    +clockParts.hour, +clockParts.minute, +clockParts.second);
+  const now = window.BookingTime.now();
   const night = new Date(now); if (now.getHours() < 5) night.setDate(now.getDate() - 1);
   const dow = night.getDay(), isWed = dow === 3;
   const closeHour = d => (d === 5 || d === 6) ? 5 : 2;
@@ -391,10 +386,11 @@
   if (user && user.first_name) $('#fName').value = user.first_name;
   const DAYS_SHORT = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
   const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-  const days = [...Array(7)].map((_, i) => { const d = new Date(night); d.setDate(night.getDate() + i); return d; });
+  let bookingToday = window.BookingTime.now(); bookingToday.setHours(0, 0, 0, 0);
+  let days = [...Array(7)].map((_, i) => { const d = new Date(bookingToday); d.setDate(d.getDate() + i); return d; });
   const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   let selDate = days[0];
-  const maxD = new Date(night); maxD.setDate(night.getDate() + 90);
+  const maxD = new Date(bookingToday); maxD.setDate(bookingToday.getDate() + 90);
   const MONTHS_N = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
   const chev = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
   let calMonth = null;
@@ -404,12 +400,12 @@
     const draw = () => {
       const y = calMonth.getFullYear(), m = calMonth.getMonth();
       const first = (new Date(y, m, 1).getDay() + 6) % 7, nDays = new Date(y, m + 1, 0).getDate();
-      const minM = new Date(night.getFullYear(), night.getMonth(), 1), maxM = new Date(maxD.getFullYear(), maxD.getMonth(), 1);
+      const minM = new Date(bookingToday.getFullYear(), bookingToday.getMonth(), 1), maxM = new Date(maxD.getFullYear(), maxD.getMonth(), 1);
       let g = '<span></span>'.repeat(first);
       for (let d = 1; d <= nDays; d++) {
         const dt = new Date(y, m, d, 12), k = iso(dt), dw = dt.getDay();
-        const off = k < iso(night) || k > iso(maxD);
-        g += `<button type="button" data-d="${k}" class="${k === iso(night) ? 'today' : ''}${dw === 5 || dw === 6 ? ' wknd' : ''}" aria-pressed="${k === iso(selDate)}" ${off ? 'disabled' : ''} aria-label="${d} ${MONTHS[m]}">${d}</button>`;
+        const off = k < iso(bookingToday) || k > iso(maxD);
+        g += `<button type="button" data-d="${k}" class="${k === iso(bookingToday) ? 'today' : ''}${dw === 5 || dw === 6 ? ' wknd' : ''}" aria-pressed="${k === iso(selDate)}" ${off ? 'disabled' : ''} aria-label="${d} ${MONTHS[m]}">${d}</button>`;
       }
       sheetBody.innerHTML = `<div class="cal-h"><button class="cal-nav" type="button" id="calPrev" aria-label="Предыдущий месяц" ${calMonth <= minM ? 'disabled' : ''}>${chev('M15 5l-7 7 7 7')}</button>
         <b id="shTitle">${MONTHS_N[m]} ${y}</b><button class="cal-nav" type="button" id="calNext" aria-label="Следующий месяц" ${calMonth >= maxM ? 'disabled' : ''}>${chev('M9 5l7 7-7 7')}</button></div>
@@ -426,22 +422,38 @@
     };
     openSheet('', draw);
   }
-  $('#days').innerHTML = days.map((d, i) => `<button type="button" class="chip" aria-pressed="${i === 0}" data-i="${i}">${i === 0 ? 'Сегодня' : i === 1 ? 'Завтра' : `${DAYS_SHORT[d.getDay()]}, ${d.getDate()}`}</button>`).join('') +
-    `<button type="button" class="chip" aria-pressed="false" data-i="other">Другая дата</button>`;
+  function renderDays() {
+    $('#days').innerHTML = days.map((d, i) => `<button type="button" class="chip" aria-pressed="${iso(d) === iso(selDate)}" data-i="${i}">${i === 0 ? 'Сегодня' : i === 1 ? 'Завтра' : DAYS_SHORT[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]}</button>`).join('') +
+      `<button type="button" class="chip" aria-pressed="${!days.some(d => iso(d) === iso(selDate))}" data-i="other">Другая дата</button>`;
+  }
+  renderDays();
   $('#days').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; haptic('tap');
     if (b.dataset.i !== 'other') $('#days').querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === b));
     if (b.dataset.i === 'other') { openCal(); return; }
     selDate = days[+b.dataset.i]; otherChip().textContent = 'Другая дата'; calMonth = null;
     fill(); };
-  const isToday = () => iso(selDate) === iso(night);
+  const isToday = () => iso(selDate) === iso(bookingToday);
   const fTime = $('#fTime');
   function fill() {
-    const last = (closeHour(selDate.getDay()) + 23) * 60; let st = 17 * 60;
-    if (isToday()) { const m = (now.getHours() < 5 ? now.getHours() + 24 : now.getHours()) * 60 + now.getMinutes(); st = Math.max(st, Math.ceil((m + 30) / 30) * 30); }
-    const o = []; for (let m = st; m <= last; m += 30) o.push(`${pad(Math.floor(m / 60) % 24)}:${pad(m % 60)}`);
-    fTime.innerHTML = o.length ? o.map(t => `<option>${t}</option>`).join('') : '<option value="">На сегодня уже поздно</option>';
-    if (o.includes('20:00')) fTime.value = '20:00';
+    const previous = fTime.value;
+    const o = window.BookingTime.slots(selDate);
+    fTime.innerHTML = o.length ? o.map(t => `<option>${t}</option>`).join('') : '<option value="">На эту дату уже поздно</option>';
+    if (o.includes(previous)) fTime.value = previous;
+    else if (o.includes('20:00')) fTime.value = '20:00';
   }
+  function refreshBookingDay() {
+    const current = window.BookingTime.now(); current.setHours(0,0,0,0);
+    if (iso(current) === iso(bookingToday)) return false;
+    bookingToday = current;
+    days = [...Array(7)].map((_, i) => { const d = new Date(current); d.setDate(d.getDate()+i); return d; });
+    maxD.setTime(current.getTime()); maxD.setDate(current.getDate()+90);
+    if (iso(selDate) < iso(current)) selDate = days[0];
+    calMonth = null; renderDays(); fill();
+    return true;
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && !$('#send').disabled) { refreshBookingDay(); fill(); }
+  });
   fill();
   let guests = 2; const gO = $('#gO'), gM = $('#gM'), gP = $('#gP');
   const setG = n => { guests = Math.max(1, Math.min(20, n)); gO.textContent = guests; gM.disabled = guests <= 1; gP.disabled = guests >= 20; };
@@ -456,20 +468,25 @@
   $('#form').onsubmit = async e => {
     e.preventDefault();
     if ($('#send').disabled) return;
+    if (refreshBookingDay()) { toast('Наступил новый день. Проверьте дату и время брони.'); return; }
     const okN = check($('#fName'), '#eName', $('#fName').value.trim().length > 1);
     const okP = check(fPhone, '#ePhone', fPhone.value.replace(/\D/g, '').length === 11);
     if (!okN) { haptic('error'); return $('#fName').focus(); } if (!okP) { haptic('error'); return fPhone.focus(); } if (!fTime.value) return fTime.focus();
     const d = selDate, btn = $('#send'); btn.disabled = true; btn.textContent = 'Отправляем…';
-    const payload = { name: $('#fName').value.trim(), phone: fPhone.value, date: iso(d), time: fTime.value, guests, note: $('#fNote').value.trim(), tg_user: user ? user.id : null };
+    const payload = { name: $('#fName').value.trim(), phone: fPhone.value, date: iso(d), date_mode: 'calendar', time: fTime.value, guests, note: $('#fNote').value.trim(), tg_user: user ? user.id : null };
+    const controls = [...$('#form').querySelectorAll('input, textarea, select, button')].map(el => [el, el.disabled]);
+    controls.forEach(([el]) => { el.disabled = true; });
     let result;
     try {
       result = await window.submitBooking(B.webhookUrl, payload);
     } catch (error) {
       haptic('error'); alert(error.message + '\nТелефон бара: ' + B.phone); return;
     } finally {
+      controls.forEach(([el, disabled]) => { el.disabled = disabled; });
       btn.disabled = false; btn.textContent = 'Отправить заявку';
     }
-    const dayTxt = isToday() ? 'сегодня' : iso(d) === iso(days[1]) ? 'завтра' : `${d.getDate()} ${MONTHS[d.getMonth()]}, ${DAYS_SHORT[d.getDay()].toLowerCase()}`;
+    const bookedDate = new Date(payload.date + 'T12:00');
+    const dayTxt = `${bookedDate.getDate()} ${MONTHS[bookedDate.getMonth()]} ${bookedDate.getFullYear()}, ${DAYS_SHORT[bookedDate.getDay()].toLowerCase()}`;
     $('#okCard').innerHTML = [['Номер заявки', result.reservation_id], ['Когда', `${dayTxt}, ${payload.time}`], ['Гостей', payload.guests], ['Имя', payload.name], ['Телефон', payload.phone]]
       .concat(payload.note ? [['Пожелания', payload.note]] : []).map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('');
     $('#demoNote').hidden = true;
@@ -489,7 +506,7 @@
     fallback.append(hint, call);
     $('#form').before(fallback);
   }
-  $('#again').onclick = () => { window.resetBookingRequest(); $('#ok').hidden = true; $('#form').hidden = false; $('#form').reset(); if (user && user.first_name) $('#fName').value = user.first_name; selDate = days[0]; calMonth = null; otherChip().textContent = 'Другая дата'; $('#days').querySelectorAll('.chip').forEach((x, i) => x.setAttribute('aria-pressed', i === 0)); setG(2); fill(); };
+  $('#again').onclick = () => { window.resetBookingRequest(); refreshBookingDay(); $('#ok').hidden = true; $('#form').hidden = false; $('#form').reset(); if (user && user.first_name) $('#fName').value = user.first_name; selDate = days[0]; calMonth = null; otherChip().textContent = 'Другая дата'; $('#days').querySelectorAll('.chip').forEach((x, i) => x.setAttribute('aria-pressed', i === 0)); setG(2); fill(); };
 
   /* ---------- Телефон и карты ---------- */
   // В Telegram на iPhone ссылки tel: часто не срабатывают, поэтому даём и звонок, и копирование.

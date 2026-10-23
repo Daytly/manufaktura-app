@@ -16,7 +16,7 @@ out = Path(args.output).resolve()
 if out == root or root in out.parents:
     parser.error('Choose an output directory outside the project')
 out.mkdir(parents=True, exist_ok=True)
-for name in ['index.html','app.js','booking-api.js','config.js','data.js','robots.txt','.nojekyll']:
+for name in ['index.html','app.js','booking-api.js','booking-time.js','config.js','data.js','robots.txt','.nojekyll']:
     shutil.copy2(root / name, out / name)
 for name in ['fonts','img']:
     shutil.copytree(root / name, out / name, dirs_exist_ok=True)

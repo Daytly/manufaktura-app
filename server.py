@@ -43,14 +43,18 @@ def validate(data, now=None):
         raise ValueError('Некорректная дата или время.')
     service_day = datetime.strptime(date, '%Y-%m-%d')
     hour, minute = map(int, slot.split(':'))
-    close = 5 if service_day.weekday() in (4, 5) else 2
+    calendar_mode = data.get('date_mode') == 'calendar'
+    if data.get('date_mode') not in (None, 'calendar'):
+        raise ValueError('Некорректный формат даты.')
+    opening_day = service_day - timedelta(days=1) if calendar_mode and hour < 5 else service_day
+    close = 5 if opening_day.weekday() in (4, 5) else 2
     # Match the existing form: last arrival is one hour before closing.
     if minute not in (0, 30) or not (17 <= hour <= 23 or 0 <= hour < close):
         raise ValueError('Выберите время работы бара.')
     total = hour * 60 + minute + (1440 if hour < 5 else 0)
     if total > (24 + close - 1) * 60:
         raise ValueError('На это время бронь уже недоступна.')
-    start = service_day + timedelta(minutes=total)
+    start = service_day + timedelta(minutes=hour*60+minute if calendar_mode else total)
     tz = ZoneInfo('Asia/Barnaul')
     now = now or datetime.now(tz)
     if start.replace(tzinfo=tz) <= now or start.replace(tzinfo=tz) > now + timedelta(days=91):
@@ -93,7 +97,7 @@ def create_app(config=None, adapter=None, db_path=None):
 
     @app.get('/<path:filename>')
     def assets(filename):
-        allowed = filename in {'app.js', 'booking-api.js', 'config.js', 'data.js', 'index.html', 'robots.txt'}
+        allowed = filename in {'app.js', 'booking-api.js', 'booking-time.js', 'config.js', 'data.js', 'index.html', 'robots.txt'}
         allowed = allowed or (filename.startswith(('fonts/', 'img/')) and not any(p.startswith('.') or p == '..' for p in filename.split('/')))
         if not allowed:
             abort(404)

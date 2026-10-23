@@ -4,7 +4,7 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY server.py remarked.py ./
-COPY index.html app.js booking-api.js config.js data.js robots.txt ./
+COPY index.html app.js booking-api.js booking-time.js config.js data.js robots.txt ./
 COPY fonts ./fonts
 COPY img ./img
 RUN mkdir -p /data && chmod 700 /data

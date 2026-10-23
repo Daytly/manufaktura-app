@@ -22,6 +22,7 @@ class ReMarked:
         self.session = requests.Session()
         self.base = None
         self.settings = {}
+        self.responsible_id = int(config.get('REMARKED_RESPONSIBLE_ID') or 713982014)
 
     def login(self):
         if not self.config.get('REMARKED_LOGIN') or not self.config.get('REMARKED_PASSWORD'):
@@ -64,6 +65,8 @@ class ReMarked:
         if data.get('readOnly'):
             raise IntegrationError('Учётная запись ReMarked доступна только для чтения.')
         self.settings = data.get('settings', {})
+        if self.responsible_id not in {int(e['id']) for e in data.get('dictionaries', {}).get('employees', [])}:
+            raise IntegrationError('Назначенный ответственный не найден в ReMarked.')
         return data['point']
 
     def body(self, booking, request_id):
@@ -83,7 +86,7 @@ class ReMarked:
                 'isTransplantBlocked': False, 'withoutPhone': False,
                 'shouldSendNotification': False, 'notificationTemplateId': None,
                 'channelPreference': None, 'source': 'telegram',
-                'responsibleId': None, 'eventTags': [], 'guestComment': '',
+                'responsibleId': self.responsible_id, 'eventTags': [], 'guestComment': '',
                 'reserveComment': 'Заявка из мини-приложения Мануфактура.' +
                     ('\n' + booking['note'] if booking['note'] else ''),
                 'guest': {'id': None, 'isSelected': False, 'firstName': booking['name'],

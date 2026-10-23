@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict');
+const time=require('../booking-time.js');
+const now=time.now(new Date('2026-10-22T18:00:00Z'));
+assert.equal(time.key(now),'2026-10-23');
+const tomorrow=new Date(now); tomorrow.setDate(tomorrow.getDate()+1);
+assert.equal(time.key(tomorrow),'2026-10-24');
+assert(time.slots(tomorrow,now).includes('03:00'));
+assert(!time.slots(new Date(2026,9,23),new Date(2026,9,22,17)).includes('03:00'));
+assert(time.slots(new Date(2026,9,23),new Date(2026,9,23,15)).includes('20:00'));
+assert(!time.slots(new Date(2026,9,23),new Date(2026,9,23,20)).includes('20:00'));
+console.log('Booking dates and overnight slots passed.');

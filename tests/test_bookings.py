@@ -87,7 +87,7 @@ class BookingTests(unittest.TestCase):
         redirect = Mock(is_redirect=True, headers={'Location':'https://cabinet4.clientomer.ru/599599'})
         landing = Mock(is_redirect=False)
         bootstrap = Mock()
-        bootstrap.json.return_value = {'status':'success','data':{'point':{'id':599599},'settings':{}}}
+        bootstrap.json.return_value = {'status':'success','data':{'point':{'id':599599},'settings':{},'dictionaries':{'employees':[{'id':713982014}]}}}
         client.session = Mock()
         client.session.get.side_effect = [redirect, landing, bootstrap]
         client.session.post.return_value.json.return_value = {'status':'success'}
@@ -105,6 +105,18 @@ class BookingTests(unittest.TestCase):
             response.json.return_value = result
             with self.assertRaises(IntegrationError):
                 client.create({'operationId':'requested'})
+
+    def test_calendar_date_is_not_shifted_after_midnight(self):
+        now = datetime(2026,10,22,17,tzinfo=ZoneInfo('Asia/Barnaul'))
+        result = validate({**self.payload,'date':'2026-10-23','time':'00:30','date_mode':'calendar'},now)
+        self.assertEqual(result['arrival_date'],'2026-10-23')
+        self.assertEqual(ReMarked({}).body(result,str(uuid4()))['payload']['responsibleId'],713982014)
+
+    def test_calendar_early_hours_use_previous_evenings_schedule(self):
+        now = datetime(2026,10,22,17,tzinfo=ZoneInfo('Asia/Barnaul'))
+        with self.assertRaises(ValueError):
+            validate({**self.payload,'date':'2026-10-23','time':'03:00','date_mode':'calendar'},now)
+        self.assertEqual(validate({**self.payload,'date':'2026-10-24','time':'03:00','date_mode':'calendar'},now)['arrival_date'],'2026-10-24')
 
 
 if __name__ == '__main__':
