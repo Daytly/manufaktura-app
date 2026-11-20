@@ -30,4 +30,4 @@ window.BAR = {
 };
 
 // Public Pages build: backend endpoint, never credentials.
-window.BAR.webhookUrl = "https://0if6-xllh-v6s6.gw-1a.dockhost.net/api/bookings";
+window.BAR.webhookUrl = "https://xbqs-974j-vdjw.gw-1a.dockhost.net/api/bookings";
